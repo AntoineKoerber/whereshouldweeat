@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { getCurrentLocation, geocodeAddress } from '../lib/googleMaps';
+import { useState, useEffect, useRef } from 'react';
+import { getCurrentLocation, geocodeAddress, loadGoogleMaps } from '../lib/googleMaps';
 import './LocationInput.css';
 
 function LocationInput({ onLocationSet }) {
@@ -7,6 +7,81 @@ function LocationInput({ onLocationSet }) {
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const autocompleteService = useRef(null);
+  const inputRef = useRef(null);
+
+  // Initialize Google Places Autocomplete Service
+  useEffect(() => {
+    const initAutocomplete = async () => {
+      const google = await loadGoogleMaps();
+      autocompleteService.current = new google.maps.places.AutocompleteService();
+    };
+    initAutocomplete();
+  }, []);
+
+  // Handle address input changes and fetch suggestions
+  const handleAddressChange = async (e) => {
+    const value = e.target.value;
+    setAddress(value);
+    setError(null);
+
+    if (value.length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    if (!autocompleteService.current) return;
+
+    try {
+      autocompleteService.current.getPlacePredictions(
+        {
+          input: value,
+          types: ['geocode', 'establishment']
+        },
+        (predictions, status) => {
+          if (status === 'OK' && predictions) {
+            setSuggestions(predictions);
+            setShowSuggestions(true);
+          } else {
+            setSuggestions([]);
+            setShowSuggestions(false);
+          }
+        }
+      );
+    } catch (err) {
+      console.error('Autocomplete error:', err);
+    }
+  };
+
+  // Handle suggestion selection
+  const handleSuggestionClick = async (suggestion) => {
+    setAddress(suggestion.description);
+    setShowSuggestions(false);
+    setSuggestions([]);
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await geocodeAddress(suggestion.description);
+      onLocationSet({
+        lat: result.lat,
+        lng: result.lng,
+        address: result.formatted_address
+      });
+    } catch (err) {
+      setError({
+        type: 'general',
+        message: 'Could not find that address',
+        instructions: 'Please try another address or use auto-detect'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAutoLocation = async () => {
     setLoading(true);
@@ -61,12 +136,17 @@ function LocationInput({ onLocationSet }) {
     e.preventDefault();
 
     if (!address.trim()) {
-      setError('Please enter an address');
+      setError({
+        type: 'general',
+        message: 'Please enter an address',
+        instructions: 'Type your city, address, or location'
+      });
       return;
     }
 
     setLoading(true);
     setError(null);
+    setShowSuggestions(false);
 
     try {
       const result = await geocodeAddress(address);
@@ -76,7 +156,11 @@ function LocationInput({ onLocationSet }) {
         address: result.formatted_address
       });
     } catch (err) {
-      setError('Could not find that address. Please try again.');
+      setError({
+        type: 'general',
+        message: 'Could not find that address',
+        instructions: 'Please try another address or select from suggestions above'
+      });
     } finally {
       setLoading(false);
     }
@@ -123,13 +207,35 @@ function LocationInput({ onLocationSet }) {
         </div>
       ) : (
         <form onSubmit={handleManualLocation} className="manual-location">
-          <input
-            type="text"
-            placeholder="Enter your address or location"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            disabled={loading}
-          />
+          <div className="autocomplete-container">
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Enter your address or location"
+              value={address}
+              onChange={handleAddressChange}
+              onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+              disabled={loading}
+              autoComplete="off"
+            />
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="suggestions-dropdown">
+                {suggestions.map((suggestion) => (
+                  <div
+                    key={suggestion.place_id}
+                    className="suggestion-item"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                  >
+                    <span className="suggestion-icon">📍</span>
+                    <div className="suggestion-text">
+                      <div className="suggestion-main">{suggestion.structured_formatting.main_text}</div>
+                      <div className="suggestion-secondary">{suggestion.structured_formatting.secondary_text}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           <button
             type="submit"
             disabled={loading}
