@@ -347,9 +347,28 @@ export const calculateTravelDuration = async (origin, destination, mode = 'DRIVI
   });
 };
 
-// Generate Google Maps URL for navigation
+// Generate navigation URL that works with multiple map apps
 export const getNavigationUrl = (lat, lng) => {
-  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  // Universal maps URL that works across different platforms and apps
+  // iOS: Opens in Apple Maps (or Google Maps if installed and preferred)
+  // Android: Prompts user to choose their preferred map app
+  // Desktop: Opens in Google Maps web version
+
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isAndroid = /Android/i.test(navigator.userAgent);
+
+  if (isIOS) {
+    // Apple Maps URL scheme - works on all iOS devices
+    // Will open in Apple Maps by default, or Google Maps if user prefers it
+    return `maps://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`;
+  } else if (isAndroid) {
+    // Google Maps intent URL - lets Android users choose their preferred app
+    // Works with Google Maps, Waze, HERE Maps, etc.
+    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  } else {
+    // Desktop: Use Google Maps web URL
+    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  }
 };
 
 // Create a map instance
