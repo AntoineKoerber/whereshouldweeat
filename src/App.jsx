@@ -39,6 +39,22 @@ function App() {
     initializeSession();
   }, []);
 
+  // Auto-dismiss notifications after 4 seconds
+  useEffect(() => {
+    if (notifications.length > 0) {
+      const timer = setTimeout(() => {
+        setNotifications([]);
+      }, 4000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [notifications]);
+
+  // Dismiss notification on click
+  const dismissNotification = (index) => {
+    setNotifications(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleLocationSet = (location) => {
     setUserLocation(location);
     setStep(STEPS.FILTERS);
@@ -178,7 +194,18 @@ function App() {
       {notifications.length > 0 && (
         <div className="notifications">
           {notifications.map((notification, index) => (
-            <div key={index} className={`notification ${notification.type}`}>
+            <div
+              key={index}
+              className={`notification ${notification.type}`}
+              onClick={() => dismissNotification(index)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  dismissNotification(index);
+                }
+              }}
+            >
               {notification.message}
             </div>
           ))}

@@ -98,6 +98,19 @@
   font-weight: 500;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  user-select: none;
+}
+
+.notification:hover {
+  transform: translateX(-4px);
+  box-shadow: var(--shadow-xl), 0 0 20px currentColor;
+  opacity: 0.9;
+}
+
+.notification:active {
+  transform: translateX(-2px) scale(0.98);
 }
 
 .notification::before {
@@ -285,6 +298,11 @@
     top: var(--spacing-md);
   }
 
+  .notification {
+    padding: var(--spacing-md);
+    font-size: 0.875rem;
+  }
+
   .searching .loader {
     width: 60px;
     height: 60px;
@@ -301,6 +319,12 @@
   .notifications {
     left: var(--spacing-sm);
     right: var(--spacing-sm);
+    top: var(--spacing-sm);
+  }
+
+  .notification {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.8125rem;
   }
 }
 
