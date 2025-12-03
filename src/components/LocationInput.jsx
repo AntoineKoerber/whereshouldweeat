@@ -18,21 +18,40 @@ function LocationInput({ onLocationSet }) {
     } catch (err) {
       console.error('Geolocation error:', err);
 
-      // More specific error messages
+      // More specific error messages with instructions
       if (err.message && err.message.includes('denied')) {
-        setError('Location access denied. Please enable location permissions or use manual entry.');
+        setError({
+          type: 'permission',
+          message: 'Location access blocked',
+          instructions: 'To enable location access: Tap the address bar → Site Settings → Location → Allow'
+        });
       } else if (err.code === 1) {
-        setError('Location access denied. Please enable location permissions or use manual entry.');
+        setError({
+          type: 'permission',
+          message: 'Location access blocked',
+          instructions: 'To enable location access: Tap the address bar → Site Settings → Location → Allow'
+        });
       } else if (err.code === 2) {
-        setError('Location unavailable. Please try manual entry.');
+        setError({
+          type: 'unavailable',
+          message: 'Location unavailable',
+          instructions: 'Please check that location services are enabled on your device'
+        });
       } else if (err.code === 3) {
-        setError('Location request timed out. Please try again or use manual entry.');
+        setError({
+          type: 'timeout',
+          message: 'Location request timed out',
+          instructions: 'Please try again or use manual address entry'
+        });
       } else {
-        setError('Could not detect location. Please use manual entry.');
+        setError({
+          type: 'general',
+          message: 'Could not detect location',
+          instructions: 'Please use manual address entry below'
+        });
       }
 
-      // Auto-switch to manual mode after error
-      setInputMode('manual');
+      // Don't auto-switch anymore - let user see the instructions
     } finally {
       setLoading(false);
     }
@@ -92,7 +111,7 @@ function LocationInput({ onLocationSet }) {
 
       {inputMode === 'auto' ? (
         <div className="auto-location">
-          <p>Let us detect your current location</p>
+          <p>Click the button below and allow location access when prompted by your browser</p>
           <button
             onClick={handleAutoLocation}
             disabled={loading}
@@ -100,6 +119,7 @@ function LocationInput({ onLocationSet }) {
           >
             <span>{loading ? 'Getting Location...' : 'Use My Location'}</span>
           </button>
+          <p className="location-hint">💡 Your browser will ask for permission to access your location</p>
         </div>
       ) : (
         <form onSubmit={handleManualLocation} className="manual-location">
@@ -120,7 +140,18 @@ function LocationInput({ onLocationSet }) {
         </form>
       )}
 
-      {error && <div className="error-message">{error}</div>}
+      {error && (
+        <div className="error-message">
+          <div className="error-title">❌ {error.message}</div>
+          <div className="error-instructions">{error.instructions}</div>
+          <button
+            onClick={() => setInputMode('manual')}
+            className="switch-to-manual-btn"
+          >
+            Switch to Manual Entry
+          </button>
+        </div>
+      )}
     </div>
   );
 }

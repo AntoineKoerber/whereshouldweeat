@@ -82,6 +82,14 @@
   line-height: 1.6;
 }
 
+.location-hint {
+  margin-top: var(--spacing-md);
+  margin-bottom: 0 !important;
+  font-size: 0.875rem !important;
+  color: var(--text-muted);
+  text-align: center;
+}
+
 .manual-location {
   display: flex;
   flex-direction: column;
@@ -162,14 +170,49 @@
 
 .error-message {
   margin-top: var(--spacing-lg);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-xl);
   background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  border: 2px solid rgba(239, 68, 68, 0.3);
   border-radius: var(--radius-lg);
-  color: var(--error);
   text-align: center;
-  font-weight: 500;
   animation: shake 0.5s;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.error-title {
+  color: var(--error);
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.error-instructions {
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  padding: var(--spacing-md);
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: var(--radius-md);
+}
+
+.switch-to-manual-btn {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  align-self: center;
+  min-width: 200px;
+}
+
+.switch-to-manual-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 @keyframes shake {
@@ -192,4 +235,9 @@
 [data-theme="light"] .manual-location input:focus {
   background: rgba(255, 255, 255, 1);
   border-color: var(--primary);
+}
+
+[data-theme="light"] .error-instructions {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(71, 85, 105, 0.15);
 }
