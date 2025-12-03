@@ -374,31 +374,140 @@
 
 @media (max-width: 768px) {
   .mystery-destination {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
+  }
+
+  .mystery-header {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .mystery-header h2 {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .mystery-tagline {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .lets-go-button {
+    padding: var(--spacing-md) var(--spacing-xl);
+    font-size: 1.125rem;
   }
 
   .mystery-map {
-    height: 350px;
+    height: 300px;
+    margin-bottom: var(--spacing-lg);
   }
 
-  .mystery-actions {
-    grid-template-columns: 1fr;
-  }
-
-  .review-button,
-  .reveal-button {
-    grid-column: span 1;
+  .mystery-info {
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
   }
 
   .info-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-md);
   }
+
+  .info-item {
+    padding: var(--spacing-md);
+  }
+
+  .info-label {
+    font-size: 0.8125rem;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .info-value {
+    font-size: 1.25rem;
+  }
+
+  .info-sublabel {
+    font-size: 0.8125rem;
+  }
+
+  .info-hours {
+    font-size: 1.125rem !important;
+  }
+
+  .mystery-actions {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .review-button,
+  .reveal-button {
+    grid-column: span 1;
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: 0.9375rem;
+  }
+
+  .mystery-reviews {
+    padding: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+  }
+
+  .mystery-reviews h3 {
+    font-size: 1.375rem;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .reviews-list {
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .review-card {
+    padding: var(--spacing-md);
+  }
+
+  .review-header {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .review-author strong {
+    font-size: 0.9375rem;
+  }
+
+  .review-rating {
+    font-size: 1rem;
+  }
+
+  .review-text {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .mystery-hint {
+    padding: var(--spacing-md);
+  }
+
+  .mystery-hint p {
+    font-size: 0.875rem;
+  }
 }
 
 @media (max-width: 480px) {
+  .mystery-destination {
+    padding: var(--spacing-xs);
+  }
+
+  .mystery-header {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .lets-go-button {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    font-size: 1rem;
+  }
+
   .mystery-map {
-    height: 300px;
+    height: 250px;
+  }
+
+  .mystery-info {
+    padding: var(--spacing-md);
   }
 
   .info-grid {
@@ -407,7 +516,7 @@
   }
 
   .info-item {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
   }
 
   .info-label {
@@ -420,6 +529,22 @@
 
   .info-hours {
     font-size: 1rem !important;
+  }
+
+  .mystery-reviews {
+    padding: var(--spacing-md);
+  }
+
+  .mystery-reviews h3 {
+    font-size: 1.25rem;
+  }
+
+  .review-card {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .review-text {
+    font-size: 0.8125rem;
   }
 }
 

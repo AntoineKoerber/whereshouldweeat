@@ -284,6 +284,102 @@
   75% { transform: translateX(10px); }
 }
 
+@media (max-width: 768px) {
+  .location-input {
+    padding: var(--spacing-sm);
+  }
+
+  .location-input h2 {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .location-mode-toggle {
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-xs);
+  }
+
+  .location-mode-toggle button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.9375rem;
+  }
+
+  .auto-location p {
+    margin-bottom: var(--spacing-md);
+    font-size: 1rem;
+  }
+
+  .manual-location {
+    gap: var(--spacing-md);
+  }
+
+  .manual-location input {
+    padding: var(--spacing-md);
+    font-size: 0.9375rem;
+  }
+
+  .primary-button {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: 1rem;
+  }
+
+  .error-message {
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-md);
+  }
+
+  .error-title {
+    font-size: 1rem;
+  }
+
+  .error-instructions {
+    font-size: 0.875rem;
+    padding: var(--spacing-sm);
+  }
+
+  .switch-to-manual-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.875rem;
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .location-input {
+    padding: var(--spacing-xs);
+  }
+
+  .location-mode-toggle button {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.875rem;
+  }
+
+  .auto-location p {
+    font-size: 0.9375rem;
+  }
+
+  .manual-location input {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .primary-button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.9375rem;
+  }
+
+  .error-title {
+    font-size: 0.9375rem;
+  }
+
+  .error-instructions {
+    font-size: 0.8125rem;
+  }
+
+  .switch-to-manual-btn {
+    font-size: 0.8125rem;
+    min-width: 160px;
+  }
+}
+
 /* Light Theme Overrides */
 [data-theme="light"] .location-mode-toggle {
   background: rgba(255, 255, 255, 0.8);

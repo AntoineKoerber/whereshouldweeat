@@ -338,32 +338,109 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .filter-settings {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
+  }
+
+  .filter-settings h2 {
+    margin-bottom: var(--spacing-md);
   }
 
   .filter-group {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
   }
 
-  .budget-options {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-md);
-  }
-}
-
-@media (max-width: 480px) {
-  .budget-options {
-    grid-template-columns: repeat(2, 1fr);
+  .filter-group label {
+    font-size: 0.9375rem;
+    margin-bottom: var(--spacing-sm);
   }
 
   .filter-value {
     font-size: 1rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
     min-width: 70px;
   }
 
+  .budget-options {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+  }
+
+  .budget-button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 1rem;
+  }
+
+  .budget-description {
+    font-size: 0.875rem;
+  }
+
+  .cuisine-select {
+    padding: var(--spacing-md);
+    font-size: 0.9375rem;
+  }
+
+  .custom-cuisine-input {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+  }
+
+  .custom-input {
+    padding: var(--spacing-md);
+    font-size: 0.9375rem;
+  }
+
   .search-button {
-    font-size: 1.0625rem;
-    padding: var(--spacing-lg) var(--spacing-xl);
+    font-size: 1rem;
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin-top: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-settings {
+    padding: var(--spacing-xs);
+  }
+
+  .filter-group {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .filter-group label {
+    font-size: 0.875rem;
+  }
+
+  .filter-value {
+    font-size: 0.9375rem;
+    padding: var(--spacing-xs);
+    min-width: 60px;
+  }
+
+  .budget-options {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-xs);
+  }
+
+  .budget-button {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.9375rem;
+  }
+
+  .budget-description {
+    font-size: 0.8125rem;
+  }
+
+  .range-labels {
+    font-size: 0.8125rem;
+  }
+
+  .cuisine-select {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .search-button {
+    font-size: 0.9375rem;
+    padding: var(--spacing-sm) var(--spacing-lg);
   }
 }
 

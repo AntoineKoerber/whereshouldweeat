@@ -428,41 +428,165 @@
 
 @media (max-width: 768px) {
   .restaurant-reveal {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
+  }
+
+  .reveal-header {
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
   }
 
   .reveal-photos {
     grid-template-columns: 1fr;
-  }
-
-  .reveal-photo {
-    height: 220px;
-  }
-
-  .info-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .reveal-actions {
-    grid-template-columns: 1fr;
-  }
-
-  .star {
-    font-size: 2.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .info-stats {
-    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
   }
 
   .reveal-photo {
     height: 200px;
   }
 
+  .reveal-info {
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .info-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .stat-item {
+    padding: var(--spacing-md);
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+  }
+
+  .info-section {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .info-section h3 {
+    font-size: 1.25rem;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .hours-list {
+    gap: var(--spacing-xs);
+  }
+
+  .hours-item {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.875rem;
+  }
+
+  .reviews-list {
+    gap: var(--spacing-md);
+  }
+
+  .review-card {
+    padding: var(--spacing-md);
+  }
+
+  .review-header {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .review-author strong {
+    font-size: 0.9375rem;
+  }
+
+  .review-rating {
+    font-size: 1rem;
+  }
+
+  .review-text {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .rating-section {
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .rating-section h3 {
+    font-size: 1.375rem;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .reveal-actions {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
   .star {
-    font-size: 2rem;
+    font-size: 2.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .restaurant-reveal {
+    padding: var(--spacing-xs);
+  }
+
+  .reveal-header {
+    padding: var(--spacing-md);
+  }
+
+  .reveal-info {
+    padding: var(--spacing-md);
+  }
+
+  .info-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+  }
+
+  .stat-item {
+    padding: var(--spacing-sm);
+  }
+
+  .stat-value {
+    font-size: 1.125rem;
+  }
+
+  .info-section h3 {
+    font-size: 1.125rem;
+  }
+
+  .review-card {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .review-text {
+    font-size: 0.8125rem;
+  }
+
+  .rating-section {
+    padding: var(--spacing-md);
+  }
+
+  .reveal-photo {
+    height: 180px;
+  }
+
+  .star {
+    font-size: 1.75rem;
+  }
+
+  .navigate-btn,
+  .start-over-btn {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: 1rem;
   }
 }
 
