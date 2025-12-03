@@ -8,6 +8,30 @@ function MysteryDestination({ restaurant, userLocation, onReveal, travelInfo }) 
   const [reviews, setReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [showReviews, setShowReviews] = useState(false);
+  const [todayHours, setTodayHours] = useState(null);
+  const [placeDetails, setPlaceDetails] = useState(null);
+
+  // Fetch place details to get opening hours
+  useEffect(() => {
+    const fetchDetails = async () => {
+      try {
+        const details = await getPlaceDetails(restaurant.place_id);
+        setPlaceDetails(details);
+
+        // Get today's opening hours
+        if (details.opening_hours?.weekday_text) {
+          const today = new Date().getDay();
+          // weekday_text is ordered starting from Sunday (0)
+          const todayIndex = today;
+          setTodayHours(details.opening_hours.weekday_text[todayIndex]);
+        }
+      } catch (error) {
+        console.error('Error fetching place details:', error);
+      }
+    };
+
+    fetchDetails();
+  }, [restaurant]);
 
   useEffect(() => {
     if (mapRef.current && restaurant) {
@@ -161,17 +185,28 @@ function MysteryDestination({ restaurant, userLocation, onReveal, travelInfo }) 
             <span className="info-value">{priceLevel}</span>
           </div>
 
-          {travelInfo?.driving && (
-            <div className="info-item">
-              <span className="info-label">🚗 Drive Time</span>
-              <span className="info-value">{travelInfo.driving.durationText}</span>
+          <div className="info-item">
+            <span className="info-label">🚗 Drive Time</span>
+            <span className="info-value">
+              {travelInfo?.driving ? travelInfo.driving.durationText : 'Calculating...'}
+            </span>
+            {travelInfo?.driving && (
               <span className="info-sublabel">{travelInfo.driving.distanceText}</span>
-            </div>
-          )}
+            )}
+          </div>
 
           <div className="info-item">
-            <span className="info-label">Status</span>
-            <span className={`info-status ${openClass}`}>{openStatus}</span>
+            <span className="info-label">Today's Hours</span>
+            <span className="info-value info-hours">
+              {todayHours ? (
+                <>
+                  <span className={`status-dot ${openClass}`}></span>
+                  {todayHours.split(': ')[1] || 'Check hours'}
+                </>
+              ) : (
+                'Loading...'
+              )}
+            </span>
           </div>
         </div>
       </div>
