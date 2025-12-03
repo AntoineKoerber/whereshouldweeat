@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import LocationInput from './components/LocationInput';
 import FilterSettings from './components/FilterSettings';
 import MysteryDestination from './components/MysteryDestination';
+import GiftBoxReveal from './components/GiftBoxReveal';
 import RestaurantReveal from './components/RestaurantReveal';
+import ThemeToggle from './components/ThemeToggle';
 import { findRestaurants, selectRandomRestaurant } from './services/restaurantSearch';
 import {
   initializeSession,
@@ -11,6 +13,7 @@ import {
   markAsRevealed,
   getVisitedPlaceIds
 } from './lib/supabase';
+import { calculateTravelDuration, calculateApproximateTravelTime } from './lib/googleMaps';
 import './App.css';
 
 const STEPS = {
@@ -18,6 +21,7 @@ const STEPS = {
   FILTERS: 'filters',
   SEARCHING: 'searching',
   MYSTERY: 'mystery',
+  GIFT_BOX: 'gift_box',
   REVEALED: 'revealed'
 };
 
@@ -28,7 +32,7 @@ function App() {
   const [historyId, setHistoryId] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [drivingInfo, setDrivingInfo] = useState(null);
+  const [travelInfo, setTravelInfo] = useState(null);
 
   // Initialize Supabase session on mount
   useEffect(() => {
@@ -66,9 +70,31 @@ function App() {
         const chosen = selectRandomRestaurant(restaurants);
         setSelectedRestaurant(chosen);
 
-        // Extract driving info if available
-        if (chosen.drivingDuration) {
-          setDrivingInfo(chosen.drivingDuration);
+        // Calculate travel durations (driving and walking)
+        try {
+          const destination = {
+            lat: chosen.geometry.location.lat(),
+            lng: chosen.geometry.location.lng()
+          };
+
+          try {
+            // Try using Distance Matrix API first (more accurate)
+            const drivingData = await calculateTravelDuration(userLocation, destination, 'DRIVING');
+
+            setTravelInfo({
+              driving: drivingData
+            });
+          } catch (distanceMatrixError) {
+            // Fallback to approximate calculation using geometry
+            const approximateData = await calculateApproximateTravelTime(userLocation, destination);
+
+            setTravelInfo({
+              driving: approximateData.driving
+            });
+          }
+        } catch (error) {
+          console.error('❌ Error calculating travel durations:', error);
+          // Continue without travel info if it fails
         }
 
         // Save to history
@@ -76,6 +102,9 @@ function App() {
         if (historyRecord) {
           setHistoryId(historyRecord.id);
         }
+
+        // Add a dramatic pause before revealing (2.5 seconds)
+        await new Promise(resolve => setTimeout(resolve, 2500));
 
         setStep(STEPS.MYSTERY);
       } else {
@@ -97,6 +126,11 @@ function App() {
   };
 
   const handleReveal = async () => {
+    // Transition to gift box animation
+    setStep(STEPS.GIFT_BOX);
+  };
+
+  const handleGiftBoxComplete = async () => {
     if (historyId) {
       await markAsRevealed(historyId);
     }
@@ -118,7 +152,7 @@ function App() {
   const handleStartOver = () => {
     setSelectedRestaurant(null);
     setHistoryId(null);
-    setDrivingInfo(null);
+    setTravelInfo(null);
     setNotifications([]);
     setStep(STEPS.FILTERS);
   };
@@ -127,13 +161,15 @@ function App() {
     setUserLocation(null);
     setSelectedRestaurant(null);
     setHistoryId(null);
-    setDrivingInfo(null);
+    setTravelInfo(null);
     setNotifications([]);
     setStep(STEPS.LOCATION);
   };
 
   return (
     <div className="app">
+      <ThemeToggle />
+
       <header className="app-header">
         <h1 className="app-title">Where Should We Eat?</h1>
         <p className="app-subtitle">Let us choose your next culinary adventure</p>
@@ -181,8 +217,12 @@ function App() {
             restaurant={selectedRestaurant}
             userLocation={userLocation}
             onReveal={handleReveal}
-            drivingInfo={drivingInfo}
+            travelInfo={travelInfo}
           />
+        )}
+
+        {step === STEPS.GIFT_BOX && (
+          <GiftBoxReveal onComplete={handleGiftBoxComplete} />
         )}
 
         {step === STEPS.REVEALED && selectedRestaurant && (

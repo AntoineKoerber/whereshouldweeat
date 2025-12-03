@@ -110,20 +110,25 @@ export const markAsRevealed = async (historyId) => {
 };
 
 // Get visited restaurants (to exclude from future searches)
+// Only excludes the last 10 restaurants to avoid running out of options
 export const getVisitedPlaceIds = async () => {
   const sessionId = getSessionId();
 
   const { data, error } = await supabase
     .from('restaurant_history')
     .select('place_id')
-    .eq('session_id', sessionId);
+    .eq('session_id', sessionId)
+    .order('visited_at', { ascending: false })
+    .limit(10); // Only exclude the last 10 restaurants
 
   if (error) {
     console.error('Error fetching history:', error);
     return [];
   }
 
-  return data.map(item => item.place_id);
+  const excludedIds = data.map(item => item.place_id);
+  console.log(`Excluding ${excludedIds.length} recently visited restaurants from search`);
+  return excludedIds;
 };
 
 // Get user's restaurant history

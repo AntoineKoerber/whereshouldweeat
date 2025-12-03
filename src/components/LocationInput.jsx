@@ -16,11 +16,23 @@ function LocationInput({ onLocationSet }) {
       const location = await getCurrentLocation();
       onLocationSet(location);
     } catch (err) {
-      setError(
-        err.message === 'User denied Geolocation'
-          ? 'Please enable location permissions to use auto-location'
-          : 'Failed to get your location. Please try manual entry.'
-      );
+      console.error('Geolocation error:', err);
+
+      // More specific error messages
+      if (err.message && err.message.includes('denied')) {
+        setError('Location access denied. Please enable location permissions or use manual entry.');
+      } else if (err.code === 1) {
+        setError('Location access denied. Please enable location permissions or use manual entry.');
+      } else if (err.code === 2) {
+        setError('Location unavailable. Please try manual entry.');
+      } else if (err.code === 3) {
+        setError('Location request timed out. Please try again or use manual entry.');
+      } else {
+        setError('Could not detect location. Please use manual entry.');
+      }
+
+      // Auto-switch to manual mode after error
+      setInputMode('manual');
     } finally {
       setLoading(false);
     }
@@ -58,17 +70,23 @@ function LocationInput({ onLocationSet }) {
       <div className="location-mode-toggle">
         <button
           className={inputMode === 'auto' ? 'active' : ''}
-          onClick={() => setInputMode('auto')}
+          onClick={() => {
+            setInputMode('auto');
+            setError(null);
+          }}
           disabled={loading}
         >
-          Auto-detect
+          <span>Auto-detect</span>
         </button>
         <button
           className={inputMode === 'manual' ? 'active' : ''}
-          onClick={() => setInputMode('manual')}
+          onClick={() => {
+            setInputMode('manual');
+            setError(null);
+          }}
           disabled={loading}
         >
-          Enter Address
+          <span>Enter Address</span>
         </button>
       </div>
 
@@ -80,7 +98,7 @@ function LocationInput({ onLocationSet }) {
             disabled={loading}
             className="primary-button"
           >
-            {loading ? 'Getting Location...' : 'Use My Location'}
+            <span>{loading ? 'Getting Location...' : 'Use My Location'}</span>
           </button>
         </div>
       ) : (
@@ -97,7 +115,7 @@ function LocationInput({ onLocationSet }) {
             disabled={loading}
             className="primary-button"
           >
-            {loading ? 'Finding Location...' : 'Set Location'}
+            <span>{loading ? 'Finding Location...' : 'Set Location'}</span>
           </button>
         </form>
       )}

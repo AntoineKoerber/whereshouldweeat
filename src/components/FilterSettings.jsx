@@ -115,7 +115,7 @@ function FilterSettings({ onSearch, userLocation }) {
                 onClick={() => handleBudgetChange(level.value)}
                 title={level.description}
               >
-                {level.label}
+                <span>{level.label}</span>
               </button>
             ))}
           </div>
@@ -198,7 +198,7 @@ function FilterSettings({ onSearch, userLocation }) {
         </div>
 
         <button type="submit" className="search-button">
-          Find Me a Restaurant!
+          <span>Find Me a Restaurant!</span>
         </button>
       </form>
     </div>

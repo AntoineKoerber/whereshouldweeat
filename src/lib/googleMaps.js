@@ -110,11 +110,66 @@ const EXCLUDED_FAST_FOOD_CHAINS = [
   'chipotle'
 ];
 
+// List of non-restaurant place types to exclude
+const EXCLUDED_PLACE_TYPES = [
+  'gas_station',
+  'convenience_store',
+  'store',
+  'supermarket',
+  'grocery_or_supermarket',
+  'shopping_mall',
+  'lodging',
+  'car_dealer',
+  'car_repair',
+  'parking',
+  'bank',
+  'atm',
+  'hospital',
+  'pharmacy',
+  'airport',
+  'train_station',
+  'transit_station',
+  'bus_station',
+  'subway_station',
+  'school',
+  'university',
+  'library',
+  'church',
+  'mosque',
+  'synagogue',
+  'hindu_temple'
+];
+
 // Check if a place is a fast food chain
 const isFastFoodChain = (placeName) => {
   if (!placeName) return false;
   const lowerName = placeName.toLowerCase();
   return EXCLUDED_FAST_FOOD_CHAINS.some(chain => lowerName.includes(chain));
+};
+
+// Check if a place has non-restaurant types
+const isNonRestaurant = (placeTypes) => {
+  if (!placeTypes || placeTypes.length === 0) return false;
+
+  // Check if it has restaurant-related types
+  const restaurantTypes = ['restaurant', 'food', 'cafe', 'meal_takeaway', 'meal_delivery'];
+  const hasRestaurantType = placeTypes.some(type => restaurantTypes.includes(type));
+
+  // If it has restaurant types, it's a restaurant (including bars that serve food)
+  if (hasRestaurantType) {
+    return false;
+  }
+
+  // Only exclude bars/night clubs if they DON'T have restaurant types
+  const barTypes = ['bar', 'night_club'];
+  const isPureBar = placeTypes.some(type => barTypes.includes(type));
+
+  if (isPureBar) {
+    return true; // Exclude pure bars
+  }
+
+  // If it doesn't have restaurant types and has excluded types, exclude it
+  return placeTypes.some(type => EXCLUDED_PLACE_TYPES.includes(type));
 };
 
 // Search for restaurants using Google Places API
@@ -148,10 +203,18 @@ export const searchRestaurants = async (location, filters, excludedPlaceIds = []
   return new Promise((resolve, reject) => {
     service.nearbySearch(request, (results, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK) {
-        // Filter out previously visited restaurants, fast food chains, and verify open status
+        console.log(`🔍 Google Places API: Found ${results.length} initial results`);
+
+        // Filter out previously visited restaurants, fast food chains, non-restaurants, and verify open status
         const filteredResults = results.filter(place => {
           // Exclude previously visited
           if (excludedPlaceIds.includes(place.place_id)) {
+            return false;
+          }
+
+          // Exclude non-restaurant places (gas stations, stores, etc.)
+          if (isNonRestaurant(place.types)) {
+            console.log(`❌ Excluded (non-restaurant): ${place.name} [${place.types.join(', ')}]`);
             return false;
           }
 
@@ -162,16 +225,26 @@ export const searchRestaurants = async (location, filters, excludedPlaceIds = []
 
           // Double-check opening hours if available
           if (place.opening_hours) {
-            return place.opening_hours.isOpen?.() !== false;
+            const isOpen = place.opening_hours.isOpen?.() !== false;
+            if (!isOpen) {
+              return false;
+            }
           }
 
           // Include if no opening hours data (benefit of the doubt)
           return true;
         });
+
+        console.log(`✅ Filtered results: ${filteredResults.length} restaurants available`);
+        if (filteredResults.length > 0) {
+          console.log(`📍 Sample: ${filteredResults.slice(0, 3).map(p => p.name).join(', ')}`);
+        }
         resolve(filteredResults);
       } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+        console.log('⚠️ Google Places returned zero results');
         resolve([]);
       } else {
+        console.error(`❌ Places search failed: ${status}`);
         reject(new Error(`Places search failed: ${status}`));
       }
     });
@@ -243,6 +316,37 @@ export const calculateDrivingDuration = async (origin, destination) => {
   });
 };
 
+// Calculate travel duration with specific travel mode
+export const calculateTravelDuration = async (origin, destination, mode = 'DRIVING') => {
+  const google = await loadGoogleMaps();
+  const service = new google.maps.DistanceMatrixService();
+
+  return new Promise((resolve, reject) => {
+    service.getDistanceMatrix(
+      {
+        origins: [origin],
+        destinations: [destination],
+        travelMode: google.maps.TravelMode[mode],
+        unitSystem: google.maps.UnitSystem.METRIC
+      },
+      (response, status) => {
+        if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
+          const element = response.rows[0].elements[0];
+          resolve({
+            distance: element.distance.value, // in meters
+            duration: element.duration.value, // in seconds
+            durationText: element.duration.text,
+            distanceText: element.distance.text
+          });
+        } else {
+          const errorMsg = response?.rows?.[0]?.elements?.[0]?.status || status;
+          reject(new Error(`Distance Matrix failed: ${errorMsg}`));
+        }
+      }
+    );
+  });
+};
+
 // Generate Google Maps URL for navigation
 export const getNavigationUrl = (lat, lng) => {
   return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
@@ -262,4 +366,58 @@ export const createMarker = async (map, position, options = {}) => {
     position,
     ...options
   });
+};
+
+// Calculate approximate travel time using straight-line distance (fallback)
+export const calculateApproximateTravelTime = async (origin, destination) => {
+  const google = await loadGoogleMaps();
+
+  // Create LatLng objects
+  const originLatLng = new google.maps.LatLng(origin.lat, origin.lng);
+  const destLatLng = new google.maps.LatLng(destination.lat, destination.lng);
+
+  // Calculate straight-line distance in meters
+  const distanceMeters = google.maps.geometry.spherical.computeDistanceBetween(originLatLng, destLatLng);
+  const distanceKm = distanceMeters / 1000;
+
+  // Approximate travel times (these are rough estimates)
+  // Driving: assume average 30 km/h in city (accounting for traffic, stops)
+  // Walking: assume average 5 km/h
+  const drivingMinutes = Math.round((distanceKm / 30) * 60);
+  const walkingMinutes = Math.round((distanceKm / 5) * 60);
+
+  // Format duration text
+  const formatDuration = (minutes) => {
+    if (minutes < 60) {
+      return `${minutes} min${minutes !== 1 ? 's' : ''}`;
+    } else {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return mins > 0 ? `${hours} hour${hours !== 1 ? 's' : ''} ${mins} min${mins !== 1 ? 's' : ''}` : `${hours} hour${hours !== 1 ? 's' : ''}`;
+    }
+  };
+
+  // Format distance text
+  const formatDistance = (meters) => {
+    if (meters < 1000) {
+      return `${Math.round(meters)} m`;
+    } else {
+      return `${(meters / 1000).toFixed(1)} km`;
+    }
+  };
+
+  return {
+    driving: {
+      distance: distanceMeters,
+      duration: drivingMinutes * 60, // in seconds
+      durationText: formatDuration(drivingMinutes),
+      distanceText: formatDistance(distanceMeters)
+    },
+    walking: {
+      distance: distanceMeters,
+      duration: walkingMinutes * 60, // in seconds
+      durationText: formatDuration(walkingMinutes),
+      distanceText: formatDistance(distanceMeters)
+    }
+  };
 };

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createMap, createMarker, getNavigationUrl, getPlaceDetails } from '../lib/googleMaps';
 import './MysteryDestination.css';
 
-function MysteryDestination({ restaurant, userLocation, onReveal, drivingInfo }) {
+function MysteryDestination({ restaurant, userLocation, onReveal, travelInfo }) {
   const mapRef = useRef(null);
   const [mapInstance, setMapInstance] = useState(null);
   const [reviews, setReviews] = useState([]);
@@ -151,13 +151,6 @@ function MysteryDestination({ restaurant, userLocation, onReveal, drivingInfo })
 
       <div className="mystery-info">
         <div className="info-grid">
-          {drivingInfo && (
-            <div className="info-item">
-              <span className="info-label">Drive Time</span>
-              <span className="info-value">{drivingInfo.durationText}</span>
-            </div>
-          )}
-
           <div className="info-item">
             <span className="info-label">Rating</span>
             <span className="info-value">{rating}</span>
@@ -168,30 +161,33 @@ function MysteryDestination({ restaurant, userLocation, onReveal, drivingInfo })
             <span className="info-value">{priceLevel}</span>
           </div>
 
-          {drivingInfo && (
+          {travelInfo?.driving && (
             <div className="info-item">
-              <span className="info-label">Distance</span>
-              <span className="info-value">{drivingInfo.distanceText}</span>
+              <span className="info-label">🚗 Drive Time</span>
+              <span className="info-value">{travelInfo.driving.durationText}</span>
+              <span className="info-sublabel">{travelInfo.driving.distanceText}</span>
             </div>
           )}
         </div>
       </div>
 
       <div className="mystery-actions">
-        <button onClick={handleNavigate} className="navigate-button">
-          Open in Google Maps
-        </button>
+        <div className="button-row">
+          <button onClick={handleNavigate} className="navigate-button">
+            <span>Open in Google Maps</span>
+          </button>
+
+          <button onClick={onReveal} className="reveal-button">
+            <span>Reveal Restaurant</span>
+          </button>
+        </div>
 
         <button
           onClick={handleShowReviews}
           className={`review-button ${showReviews ? 'active' : ''}`}
           disabled={loadingReviews}
         >
-          {loadingReviews ? 'Loading...' : showReviews ? 'Hide Reviews' : '📝 Read Reviews'}
-        </button>
-
-        <button onClick={onReveal} className="reveal-button">
-          Reveal Restaurant
+          <span>{loadingReviews ? 'Loading...' : showReviews ? 'Hide Reviews' : '📝 Read Reviews'}</span>
         </button>
       </div>
 

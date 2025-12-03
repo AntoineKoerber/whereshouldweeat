@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { getPlaceDetails, createMap, createMarker } from '../lib/googleMaps';
+import { getPlaceDetails, createMap, createMarker, calculateTravelDuration } from '../lib/googleMaps';
 import './RestaurantReveal.css';
 
 function RestaurantReveal({ restaurant, userLocation, onRate, onStartOver }) {
   const [details, setDetails] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [travelInfo, setTravelInfo] = useState(null);
   const mapRef = useRef(null);
 
   useEffect(() => {
@@ -12,12 +13,27 @@ function RestaurantReveal({ restaurant, userLocation, onRate, onStartOver }) {
       try {
         const placeDetails = await getPlaceDetails(restaurant.place_id);
         setDetails(placeDetails);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching place details:', error);
+        setLoading(false);
+      }
+    };
 
-        // Initialize map with photos
-        if (mapRef.current) {
+    fetchDetails();
+  }, [restaurant]);
+
+  // Separate effect for map initialization after details are loaded
+  useEffect(() => {
+    const initMap = async () => {
+      if (details && mapRef.current) {
+        try {
+          // Small delay to ensure DOM is ready
+          await new Promise(resolve => setTimeout(resolve, 100));
+
           const location = {
-            lat: placeDetails.geometry.location.lat(),
-            lng: placeDetails.geometry.location.lng()
+            lat: details.geometry.location.lat(),
+            lng: details.geometry.location.lng()
           };
 
           const map = await createMap(mapRef.current, {
@@ -29,19 +45,43 @@ function RestaurantReveal({ restaurant, userLocation, onRate, onStartOver }) {
           });
 
           await createMarker(map, location, {
-            title: placeDetails.name,
+            title: details.name,
             animation: window.google.maps.Animation.BOUNCE
           });
+        } catch (error) {
+          console.error('Error initializing map:', error);
         }
-      } catch (error) {
-        console.error('Error fetching place details:', error);
-      } finally {
-        setLoading(false);
       }
     };
 
-    fetchDetails();
-  }, [restaurant]);
+    initMap();
+  }, [details]);
+
+  // Fetch travel duration (driving) after details are loaded
+  useEffect(() => {
+    const fetchTravelInfo = async () => {
+      if (details && userLocation) {
+        try {
+          const destination = {
+            lat: details.geometry.location.lat(),
+            lng: details.geometry.location.lng()
+          };
+
+          // Fetch driving duration
+          const drivingData = await calculateTravelDuration(userLocation, destination, 'DRIVING');
+
+          setTravelInfo({
+            driving: drivingData
+          });
+        } catch (error) {
+          console.error('Error fetching travel info:', error);
+          // Don't block rendering if travel info fails
+        }
+      }
+    };
+
+    fetchTravelInfo();
+  }, [details, userLocation]);
 
   if (loading) {
     return (
@@ -56,8 +96,8 @@ function RestaurantReveal({ restaurant, userLocation, onRate, onStartOver }) {
     return (
       <div className="restaurant-reveal error">
         <p>Unable to load restaurant details.</p>
-        <button onClick={onStartOver} className="primary-button">
-          Try Again
+        <button onClick={onStartOver} className="start-over-btn">
+          <span>Try Again</span>
         </button>
       </div>
     );
@@ -97,84 +137,122 @@ function RestaurantReveal({ restaurant, userLocation, onRate, onStartOver }) {
   return (
     <div className="restaurant-reveal">
       <div className="reveal-header">
-        <h1 className="restaurant-name">{details.name}</h1>
-        <div className="restaurant-meta">
-          <span className={`open-status ${openClass}`}>{isOpen}</span>
-          <span className="price-level">{priceLevel}</span>
-          {details.rating && (
-            <span className="rating">
-              {details.rating} ⭐ ({details.user_ratings_total} reviews)
-            </span>
-          )}
-        </div>
+        <h1 className="reveal-name">{details.name}</h1>
+        <p className="reveal-address">{details.formatted_address}</p>
+        <div className={`reveal-status ${openClass}`}>{isOpen}</div>
       </div>
 
       {details.photos && details.photos.length > 0 && (
-        <div className="photo-gallery">
+        <div className="reveal-photos">
           {details.photos.slice(0, 3).map((photo, index) => (
-            <img
-              key={index}
-              src={photo.getUrl({ maxWidth: 400, maxHeight: 300 })}
-              alt={`${details.name} photo ${index + 1}`}
-              className="restaurant-photo"
-            />
+            <div key={index} className="reveal-photo">
+              <img
+                src={photo.getUrl({ maxWidth: 500, maxHeight: 400 })}
+                alt={`${details.name} photo ${index + 1}`}
+              />
+            </div>
           ))}
         </div>
       )}
 
-      <div className="restaurant-map" ref={mapRef}></div>
+      <div className="reveal-info">
+        <div className="info-stats">
+          {details.rating && (
+            <div className="stat-item">
+              <div className="stat-label">Rating</div>
+              <div className="stat-value">{details.rating} ⭐</div>
+            </div>
+          )}
 
-      <div className="restaurant-details">
-        <div className="detail-section">
-          <h3>Address</h3>
-          <p>{details.formatted_address}</p>
+          <div className="stat-item">
+            <div className="stat-label">Price</div>
+            <div className="stat-value">{priceLevel}</div>
+          </div>
+
+          {details.user_ratings_total && (
+            <div className="stat-item">
+              <div className="stat-label">Reviews</div>
+              <div className="stat-value">{details.user_ratings_total.toLocaleString()}</div>
+            </div>
+          )}
+
+          {travelInfo?.driving && (
+            <div className="stat-item">
+              <div className="stat-label">🚗 Drive Time</div>
+              <div className="stat-value">{travelInfo.driving.durationText}</div>
+              <div className="stat-sublabel">{travelInfo.driving.distanceText}</div>
+            </div>
+          )}
         </div>
 
-        {details.formatted_phone_number && (
-          <div className="detail-section">
-            <h3>Phone</h3>
-            <p>
-              <a href={`tel:${details.formatted_phone_number}`}>
-                {details.formatted_phone_number}
-              </a>
-            </p>
-          </div>
-        )}
+        <div className="info-section">
+          <h3>📍 Location</h3>
+          <div
+            ref={mapRef}
+            className="reveal-map"
+            style={{
+              width: '100%',
+              height: '350px',
+              borderRadius: 'var(--radius-xl)',
+              overflow: 'hidden',
+              marginTop: 'var(--spacing-md)',
+              border: '2px solid var(--glass-border)',
+              boxShadow: 'var(--shadow-lg)'
+            }}
+          ></div>
+        </div>
 
-        {details.website && (
-          <div className="detail-section">
-            <h3>Website</h3>
-            <p>
-              <a href={details.website} target="_blank" rel="noopener noreferrer">
-                Visit Website
-              </a>
-            </p>
+        {(details.formatted_phone_number || details.website) && (
+          <div className="info-section">
+            <h3>📞 Contact</h3>
+            <div className="contact-links">
+              {details.formatted_phone_number && (
+                <a href={`tel:${details.formatted_phone_number}`} className="contact-link">
+                  {details.formatted_phone_number}
+                </a>
+              )}
+              {details.website && (
+                <a href={details.website} target="_blank" rel="noopener noreferrer" className="contact-link">
+                  Visit Website →
+                </a>
+              )}
+            </div>
           </div>
         )}
 
         {details.opening_hours?.weekday_text && (
-          <div className="detail-section">
-            <h3>Opening Hours</h3>
-            <ul className="hours-list">
-              {details.opening_hours.weekday_text.map((day, index) => (
-                <li key={index}>{day}</li>
-              ))}
-            </ul>
+          <div className="info-section">
+            <h3>🕐 Opening Hours</h3>
+            <div className="hours-list">
+              {details.opening_hours.weekday_text.map((hours, index) => {
+                const [day, time] = hours.split(': ');
+                return (
+                  <div key={index} className="hours-item">
+                    <span className="hours-day">{day}</span>
+                    <span className="hours-time">{time}</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
         {details.reviews && details.reviews.length > 0 && (
-          <div className="detail-section">
-            <h3>Recent Reviews</h3>
-            <div className="reviews">
-              {details.reviews.slice(0, 3).map((review, index) => (
-                <div key={index} className="review">
+          <div className="info-section">
+            <h3>📝 Reviews</h3>
+            <div className="reviews-list">
+              {details.reviews.slice(0, 4).map((review, index) => (
+                <div key={index} className="review-card">
                   <div className="review-header">
-                    <strong>{review.author_name}</strong>
-                    <span className="review-rating">{review.rating} ⭐</span>
+                    <div className="review-author">
+                      <strong>{review.author_name}</strong>
+                      <span className="review-time">{review.relative_time_description}</span>
+                    </div>
+                    <div className="review-rating">
+                      {'⭐'.repeat(review.rating)}
+                    </div>
                   </div>
                   <p className="review-text">{review.text}</p>
-                  <span className="review-time">{review.relative_time_description}</span>
                 </div>
               ))}
             </div>
@@ -182,25 +260,30 @@ function RestaurantReveal({ restaurant, userLocation, onRate, onStartOver }) {
         )}
       </div>
 
-      <div className="reveal-actions">
-        <div className="rating-section">
-          <h3>How was your experience?</h3>
-          <div className="rating-buttons">
-            {[1, 2, 3, 4, 5].map((rating) => (
-              <button
-                key={rating}
-                onClick={() => onRate(rating)}
-                className="rating-button"
-                title={`${rating} star${rating !== 1 ? 's' : ''}`}
-              >
-                {'⭐'.repeat(rating)}
-              </button>
-            ))}
-          </div>
+      <div className="rating-section">
+        <h3>⭐ How was your experience?</h3>
+        <div className="star-rating">
+          {[1, 2, 3, 4, 5].map((rating) => (
+            <button
+              key={rating}
+              onClick={() => onRate(rating)}
+              className="star"
+            >
+              ⭐
+            </button>
+          ))}
         </div>
+      </div>
 
-        <button onClick={onStartOver} className="start-over-button">
-          Find Another Restaurant
+      <div className="reveal-actions">
+        <button
+          onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${details.geometry.location.lat()},${details.geometry.location.lng()}`, '_blank')}
+          className="navigate-btn"
+        >
+          <span>Navigate There</span>
+        </button>
+        <button onClick={onStartOver} className="start-over-btn">
+          <span>Find Another Restaurant</span>
         </button>
       </div>
     </div>
