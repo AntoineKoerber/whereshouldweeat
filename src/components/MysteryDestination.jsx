@@ -142,9 +142,9 @@ function MysteryDestination({ restaurant, userLocation, onReveal, travelInfo }) 
         <p className="mystery-tagline">
           Adventure time! We've found the perfect spot for you.
         </p>
-        <div className={`status-badge ${openClass}`}>
-          {openStatus}
-        </div>
+        <button onClick={handleNavigate} className="lets-go-button">
+          <span>Let's Go! 🚗</span>
+        </button>
       </div>
 
       <div className="mystery-map" ref={mapRef}></div>
@@ -168,19 +168,18 @@ function MysteryDestination({ restaurant, userLocation, onReveal, travelInfo }) 
               <span className="info-sublabel">{travelInfo.driving.distanceText}</span>
             </div>
           )}
+
+          <div className="info-item">
+            <span className="info-label">Status</span>
+            <span className={`info-status ${openClass}`}>{openStatus}</span>
+          </div>
         </div>
       </div>
 
       <div className="mystery-actions">
-        <div className="button-row">
-          <button onClick={handleNavigate} className="navigate-button">
-            <span>Open in Google Maps</span>
-          </button>
-
-          <button onClick={onReveal} className="reveal-button">
-            <span>Reveal Restaurant</span>
-          </button>
-        </div>
+        <button onClick={onReveal} className="reveal-button">
+          <span>Reveal Restaurant</span>
+        </button>
 
         <button
           onClick={handleShowReviews}
