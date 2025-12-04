@@ -67,6 +67,10 @@ function ScratchCard({ restaurant, onComplete }) {
     return percentage;
   };
 
+  const lastPositionRef = useRef(null);
+  const scratchCountRef = useRef(0);
+  const lastCheckRef = useRef(0);
+
   const scratch = (x, y) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -77,32 +81,53 @@ function ScratchCard({ restaurant, onComplete }) {
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
 
+    const canvasX = (x - rect.left) * scaleX;
+    const canvasY = (y - rect.top) * scaleY;
+
     ctx.globalCompositeOperation = 'destination-out';
+
+    // If we have a last position, draw a line between points for smooth scratching
+    if (lastPositionRef.current) {
+      const lastX = lastPositionRef.current.x;
+      const lastY = lastPositionRef.current.y;
+
+      ctx.lineWidth = 60 * window.devicePixelRatio;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(canvasX, canvasY);
+      ctx.stroke();
+    }
+
+    // Draw circle at current position
     ctx.beginPath();
-    ctx.arc(
-      (x - rect.left) * scaleX,
-      (y - rect.top) * scaleY,
-      30 * window.devicePixelRatio,
-      0,
-      Math.PI * 2
-    );
+    ctx.arc(canvasX, canvasY, 30 * window.devicePixelRatio, 0, Math.PI * 2);
     ctx.fill();
 
-    // Calculate percentage after scratching
-    const percentage = calculateScratchPercentage();
-    setScratchPercentage(percentage);
+    lastPositionRef.current = { x: canvasX, y: canvasY };
+    scratchCountRef.current++;
 
-    // Complete when 80% scratched
-    if (percentage >= 80 && !hasCompleted) {
-      setHasCompleted(true);
-      setTimeout(() => {
-        onComplete();
-      }, 500);
+    // Only calculate percentage every 10 scratches for performance
+    if (scratchCountRef.current - lastCheckRef.current >= 10) {
+      lastCheckRef.current = scratchCountRef.current;
+
+      const percentage = calculateScratchPercentage();
+      setScratchPercentage(percentage);
+
+      // Complete when 80% scratched
+      if (percentage >= 80 && !hasCompleted) {
+        setHasCompleted(true);
+        setTimeout(() => {
+          onComplete();
+        }, 500);
+      }
     }
   };
 
   const handleMouseDown = (e) => {
     setIsScratching(true);
+    lastPositionRef.current = null;
     scratch(e.clientX, e.clientY);
   };
 
@@ -113,11 +138,13 @@ function ScratchCard({ restaurant, onComplete }) {
 
   const handleMouseUp = () => {
     setIsScratching(false);
+    lastPositionRef.current = null;
   };
 
   const handleTouchStart = (e) => {
     e.preventDefault();
     setIsScratching(true);
+    lastPositionRef.current = null;
     const touch = e.touches[0];
     scratch(touch.clientX, touch.clientY);
   };
@@ -132,6 +159,7 @@ function ScratchCard({ restaurant, onComplete }) {
   const handleTouchEnd = (e) => {
     e.preventDefault();
     setIsScratching(false);
+    lastPositionRef.current = null;
   };
 
   // Get restaurant photo
