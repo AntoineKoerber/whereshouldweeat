@@ -2,19 +2,32 @@ import { useState } from 'react';
 import './ScratchCard.css';
 
 function ScratchCard({ restaurant, onComplete }) {
-  const [isPressed, setIsPressed] = useState(false);
-  const [isRevealing, setIsRevealing] = useState(false);
+  const [taps, setTaps] = useState([]);
+  const [tapCount, setTapCount] = useState(0);
+  const [isShattered, setIsShattered] = useState(false);
+  const tapsNeeded = 8;
 
-  const handleTouch = () => {
-    if (isRevealing) return;
+  const handleTap = (e) => {
+    if (isShattered) return;
 
-    setIsPressed(true);
-    setIsRevealing(true);
+    // Get tap position
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX || e.touches?.[0]?.clientX) - rect.left) / rect.width * 100;
+    const y = ((e.clientY || e.touches?.[0]?.clientY) - rect.top) / rect.height * 100;
 
-    // Start reveal animation
-    setTimeout(() => {
-      onComplete();
-    }, 2000);
+    const newTapCount = tapCount + 1;
+    setTapCount(newTapCount);
+
+    // Add crack at tap position
+    setTaps(prev => [...prev, { id: Date.now(), x, y }]);
+
+    // Shatter when enough taps
+    if (newTapCount >= tapsNeeded) {
+      setIsShattered(true);
+      setTimeout(() => {
+        onComplete();
+      }, 1500);
+    }
   };
 
   // Get restaurant photo
@@ -27,11 +40,14 @@ function ScratchCard({ restaurant, onComplete }) {
       <div className="scratch-content">
         <h2 className="scratch-title">Your Restaurant Awaits!</h2>
         <p className="scratch-instruction">
-          {!isPressed ? 'Place your finger on the circle to reveal' : 'Revealing...'}
+          {isShattered
+            ? 'Revealing...'
+            : `Tap to break the glass (${tapCount}/${tapsNeeded})`
+          }
         </p>
 
         <div className="scratch-card-container">
-          <div className={`scratch-card ${isRevealing ? 'revealing' : ''}`}>
+          <div className={`scratch-card ${isShattered ? 'shattered' : ''}`}>
             {/* Restaurant info underneath */}
             <div className="card-background">
               {photoUrl && (
@@ -49,30 +65,51 @@ function ScratchCard({ restaurant, onComplete }) {
               </div>
             </div>
 
-            {/* Overlay with fingerprint spot */}
-            {!isRevealing && (
-              <div className="card-overlay">
-                <div
-                  className="fingerprint-spot"
-                  onClick={handleTouch}
-                  onTouchStart={(e) => {
-                    e.preventDefault();
-                    handleTouch();
-                  }}
-                >
-                  <div className="fingerprint-icon">👆</div>
-                  <div className="pulse-ring"></div>
-                  <div className="pulse-ring delay-1"></div>
-                  <div className="pulse-ring delay-2"></div>
-                </div>
-                <p className="overlay-text">Touch Here</p>
+            {/* Glass overlay */}
+            {!isShattered && (
+              <div
+                className="card-overlay glass-overlay"
+                onClick={handleTap}
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  handleTap(e);
+                }}
+              >
+                {/* Render cracks */}
+                {taps.map((tap) => (
+                  <div
+                    key={tap.id}
+                    className="crack"
+                    style={{
+                      left: `${tap.x}%`,
+                      top: `${tap.y}%`,
+                    }}
+                  >
+                    <svg className="crack-svg" viewBox="0 0 200 200">
+                      {/* Radiating crack lines */}
+                      <line x1="100" y1="100" x2="20" y2="30" className="crack-line" />
+                      <line x1="100" y1="100" x2="180" y2="40" className="crack-line" />
+                      <line x1="100" y1="100" x2="30" y2="170" className="crack-line" />
+                      <line x1="100" y1="100" x2="170" y2="160" className="crack-line" />
+                      <line x1="100" y1="100" x2="10" y2="100" className="crack-line" />
+                      <line x1="100" y1="100" x2="190" y2="100" className="crack-line" />
+                      <line x1="100" y1="100" x2="100" y2="10" className="crack-line" />
+                      <line x1="100" y1="100" x2="100" y2="190" className="crack-line" />
+                      {/* Impact point */}
+                      <circle cx="100" cy="100" r="8" className="crack-impact" />
+                    </svg>
+                  </div>
+                ))}
+
+                <div className="glass-shine"></div>
+                <p className="overlay-text">Tap to Shatter</p>
               </div>
             )}
           </div>
 
-          {isRevealing && (
+          {isShattered && (
             <div className="scratch-complete">
-              <p>✨ Revealing your restaurant...</p>
+              <p>✨ Glass shattered! Revealing your restaurant...</p>
             </div>
           )}
         </div>
