@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import LocationInput from './components/LocationInput';
 import FilterSettings from './components/FilterSettings';
 import MysteryDestination from './components/MysteryDestination';
-import GiftBoxReveal from './components/GiftBoxReveal';
+import ScratchCard from './components/ScratchCard';
 import RestaurantReveal from './components/RestaurantReveal';
 import ThemeToggle from './components/ThemeToggle';
 import { findRestaurants, selectRandomRestaurant } from './services/restaurantSearch';
@@ -21,7 +21,7 @@ const STEPS = {
   FILTERS: 'filters',
   SEARCHING: 'searching',
   MYSTERY: 'mystery',
-  GIFT_BOX: 'gift_box',
+  SCRATCH_CARD: 'scratch_card',
   REVEALED: 'revealed'
 };
 
@@ -142,11 +142,11 @@ function App() {
   };
 
   const handleReveal = async () => {
-    // Transition to gift box animation
-    setStep(STEPS.GIFT_BOX);
+    // Transition to scratch card
+    setStep(STEPS.SCRATCH_CARD);
   };
 
-  const handleGiftBoxComplete = async () => {
+  const handleScratchComplete = async () => {
     if (historyId) {
       await markAsRevealed(historyId);
     }
@@ -248,8 +248,11 @@ function App() {
           />
         )}
 
-        {step === STEPS.GIFT_BOX && (
-          <GiftBoxReveal onComplete={handleGiftBoxComplete} />
+        {step === STEPS.SCRATCH_CARD && selectedRestaurant && (
+          <ScratchCard
+            restaurant={selectedRestaurant}
+            onComplete={handleScratchComplete}
+          />
         )}
 
         {step === STEPS.REVEALED && selectedRestaurant && (

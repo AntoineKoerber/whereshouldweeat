@@ -1,0 +1,249 @@
+.scratch-card-reveal {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  animation: fadeIn 0.6s ease-out;
+}
+
+.scratch-content {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+.scratch-title {
+  font-size: clamp(2rem, 4vw, 2.5rem);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+  background: linear-gradient(135deg, var(--primary-light), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: fadeInDown 0.6s ease-out;
+}
+
+.scratch-instruction {
+  color: var(--text-secondary);
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  margin-bottom: var(--spacing-2xl);
+  font-weight: 500;
+  animation: fadeInUp 0.6s ease-out 0.2s backwards;
+}
+
+.scratch-card-container {
+  animation: fadeInScale 0.6s ease-out 0.4s backwards;
+}
+
+.scratch-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  max-width: 500px;
+  margin: 0 auto;
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-2xl);
+  border: 3px solid var(--glass-border);
+  cursor: grab;
+  user-select: none;
+}
+
+.scratch-card:active {
+  cursor: grabbing;
+}
+
+.card-background {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.card-image {
+  width: 100%;
+  height: 60%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.card-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-xl);
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
+.card-restaurant-name {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  text-align: center;
+  line-height: 1.3;
+}
+
+.card-address {
+  color: var(--text-secondary);
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  text-align: center;
+  margin: 0;
+}
+
+.scratch-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.scratch-progress {
+  margin-top: var(--spacing-xl);
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  margin-bottom: var(--spacing-sm);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease-out;
+  box-shadow: 0 0 10px var(--primary);
+}
+
+.progress-text {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.scratch-complete {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background: rgba(16, 185, 129, 0.1);
+  border: 2px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-lg);
+  animation: fadeInScale 0.3s ease-out;
+}
+
+.scratch-complete p {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 1.125rem;
+  margin: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .scratch-card-reveal {
+    padding: var(--spacing-lg);
+  }
+
+  .scratch-card {
+    max-width: 400px;
+  }
+
+  .card-info {
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .scratch-card-reveal {
+    padding: var(--spacing-md);
+  }
+
+  .scratch-card {
+    max-width: 100%;
+    aspect-ratio: 2 / 3;
+  }
+
+  .card-info {
+    padding: var(--spacing-md);
+  }
+
+  .scratch-instruction {
+    margin-bottom: var(--spacing-lg);
+  }
+}
+
+/* Light Theme Overrides */
+[data-theme="light"] .card-background {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+[data-theme="light"] .card-info {
+  background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
+}
+
+[data-theme="light"] .scratch-card {
+  border-color: rgba(71, 85, 105, 0.2);
+}
+
+[data-theme="light"] .progress-bar {
+  background: rgba(203, 213, 225, 0.5);
+  border-color: rgba(71, 85, 105, 0.2);
+}
+
+[data-theme="light"] .scratch-complete {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.4);
+}
