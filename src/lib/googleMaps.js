@@ -86,8 +86,9 @@ export const geocodeAddress = async (address) => {
   });
 };
 
-// List of fast food chains to exclude
+// List of fast food chains and supermarket restaurants to exclude
 const EXCLUDED_FAST_FOOD_CHAINS = [
+  // Fast food chains
   'mcdonald',
   'mcdo',
   'burger king',
@@ -107,7 +108,32 @@ const EXCLUDED_FAST_FOOD_CHAINS = [
   'arby',
   'popeyes',
   'chick-fil-a',
-  'chipotle'
+  'chipotle',
+
+  // Supermarket restaurants
+  'coop restaurant',
+  'migros restaurant',
+  'aldi restaurant',
+  'lidl restaurant',
+  'walmart',
+  'target cafe',
+  'costco food court',
+  'ikea restaurant',
+  'whole foods',
+  'trader joe',
+  'safeway',
+  'kroger',
+  'publix',
+  'carrefour',
+  'tesco cafe',
+  'asda cafe',
+  'sainsbury',
+  'waitrose cafe',
+  'auchan',
+  'leclerc',
+  'intermarché',
+  'casino',
+  'monoprix'
 ];
 
 // List of non-restaurant place types to exclude
@@ -140,7 +166,7 @@ const EXCLUDED_PLACE_TYPES = [
   'hindu_temple'
 ];
 
-// Check if a place is a fast food chain
+// Check if a place is a fast food chain or supermarket restaurant
 const isFastFoodChain = (placeName) => {
   if (!placeName) return false;
   const lowerName = placeName.toLowerCase();
@@ -205,7 +231,7 @@ export const searchRestaurants = async (location, filters, excludedPlaceIds = []
       if (status === google.maps.places.PlacesServiceStatus.OK) {
         console.log(`🔍 Google Places API: Found ${results.length} initial results`);
 
-        // Filter out previously visited restaurants, fast food chains, non-restaurants, and verify open status
+        // Filter out previously visited restaurants, fast food chains, supermarket restaurants, non-restaurants, and verify open status
         const filteredResults = results.filter(place => {
           // Exclude previously visited
           if (excludedPlaceIds.includes(place.place_id)) {
@@ -218,8 +244,9 @@ export const searchRestaurants = async (location, filters, excludedPlaceIds = []
             return false;
           }
 
-          // Exclude fast food chains
+          // Exclude fast food chains and supermarket restaurants
           if (isFastFoodChain(place.name)) {
+            console.log(`❌ Excluded (fast food/supermarket): ${place.name}`);
             return false;
           }
 
