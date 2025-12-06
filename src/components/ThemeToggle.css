@@ -31,10 +31,10 @@
 
 @media (max-width: 768px) {
   .theme-toggle {
-    width: 42px;
-    height: 42px;
-    font-size: 1.125rem;
-    top: 120px;
+    width: 44px;
+    height: 44px;
+    font-size: 1.25rem;
+    top: var(--spacing-md);
     right: var(--spacing-md);
   }
 }
@@ -44,7 +44,7 @@
     width: 40px;
     height: 40px;
     font-size: 1.125rem;
-    top: 110px;
+    top: var(--spacing-sm);
     right: var(--spacing-sm);
   }
 }

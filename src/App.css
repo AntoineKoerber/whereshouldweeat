@@ -284,6 +284,11 @@
 @media (max-width: 768px) {
   .app-header {
     padding: var(--spacing-xl) var(--spacing-md);
+    padding-right: 70px;
+  }
+
+  .app-title {
+    padding-right: var(--spacing-xs);
   }
 
   .app-main {
@@ -310,6 +315,10 @@
 }
 
 @media (max-width: 480px) {
+  .app-header {
+    padding-right: 60px;
+  }
+
   .app-main {
     margin: var(--spacing-sm);
     padding: var(--spacing-md);
