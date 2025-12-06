@@ -5,7 +5,7 @@ function ScratchCard({ restaurant, onComplete }) {
   const [taps, setTaps] = useState([]);
   const [tapCount, setTapCount] = useState(0);
   const [isShattered, setIsShattered] = useState(false);
-  const tapsNeeded = 8;
+  const tapsNeeded = 4;
 
   const handleTap = (e) => {
     if (isShattered) return;
