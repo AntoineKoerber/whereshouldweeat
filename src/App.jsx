@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import LocationInput from './components/LocationInput';
 import FilterSettings from './components/FilterSettings';
+import ChoicePage from './components/ChoicePage';
 import MysteryDestination from './components/MysteryDestination';
 import ScratchCard from './components/ScratchCard';
 import RestaurantReveal from './components/RestaurantReveal';
@@ -20,6 +21,7 @@ const STEPS = {
   LOCATION: 'location',
   FILTERS: 'filters',
   SEARCHING: 'searching',
+  CHOICE: 'choice',
   MYSTERY: 'mystery',
   SCRATCH_CARD: 'scratch_card',
   REVEALED: 'revealed'
@@ -119,10 +121,10 @@ function App() {
           setHistoryId(historyRecord.id);
         }
 
-        // Add a dramatic pause before revealing (2.5 seconds)
+        // Add a dramatic pause before showing choice page (2.5 seconds)
         await new Promise(resolve => setTimeout(resolve, 2500));
 
-        setStep(STEPS.MYSTERY);
+        setStep(STEPS.CHOICE);
       } else {
         // Not enough restaurants found
         setStep(STEPS.FILTERS);
@@ -138,6 +140,16 @@ function App() {
       setStep(STEPS.FILTERS);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleChoice = (choice) => {
+    if (choice === 'reveal') {
+      // Skip directly to scratch card reveal
+      setStep(STEPS.SCRATCH_CARD);
+    } else {
+      // Go to mystery page with hints
+      setStep(STEPS.MYSTERY);
     }
   };
 
@@ -237,6 +249,10 @@ function App() {
             <h2>Finding the perfect spot for you...</h2>
             <p>Analyzing restaurants in your area</p>
           </div>
+        )}
+
+        {step === STEPS.CHOICE && selectedRestaurant && (
+          <ChoicePage onChoice={handleChoice} />
         )}
 
         {step === STEPS.MYSTERY && selectedRestaurant && (
