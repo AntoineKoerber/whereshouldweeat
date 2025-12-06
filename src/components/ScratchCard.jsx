@@ -10,14 +10,10 @@ function ScratchCard({ restaurant, onComplete }) {
   const handleTap = (e) => {
     if (isShattered) return;
 
-    // Prevent both touch and click from firing
-    e.preventDefault();
-    e.stopPropagation();
-
-    // Get tap position
+    // Get tap position (works for both mouse and touch)
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX || e.touches?.[0]?.clientX) - rect.left) / rect.width * 100;
-    const y = ((e.clientY || e.touches?.[0]?.clientY) - rect.top) / rect.height * 100;
+    const x = (e.clientX - rect.left) / rect.width * 100;
+    const y = (e.clientY - rect.top) / rect.height * 100;
 
     const newTapCount = tapCount + 1;
     setTapCount(newTapCount);
@@ -74,7 +70,6 @@ function ScratchCard({ restaurant, onComplete }) {
               <div
                 className="card-overlay glass-overlay"
                 onClick={handleTap}
-                onTouchStart={handleTap}
               >
                 {/* Render cracks */}
                 {taps.map((tap) => (
