@@ -284,11 +284,11 @@
 @media (max-width: 768px) {
   .app-header {
     padding: var(--spacing-xl) var(--spacing-md);
-    padding-right: 70px;
   }
 
   .app-title {
-    padding-right: var(--spacing-xs);
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    line-height: 1.2;
   }
 
   .app-main {
@@ -315,8 +315,9 @@
 }
 
 @media (max-width: 480px) {
-  .app-header {
-    padding-right: 60px;
+  .app-title {
+    font-size: clamp(1.25rem, 5vw, 1.75rem);
+    letter-spacing: -0.01em;
   }
 
   .app-main {
