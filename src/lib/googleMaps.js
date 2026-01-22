@@ -229,8 +229,6 @@ export const searchRestaurants = async (location, filters, excludedPlaceIds = []
   return new Promise((resolve, reject) => {
     service.nearbySearch(request, (results, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK) {
-        console.log(`🔍 Google Places API: Found ${results.length} initial results`);
-
         // Filter out previously visited restaurants, fast food chains, supermarket restaurants, non-restaurants, and verify open status
         const filteredResults = results.filter(place => {
           // Exclude previously visited
@@ -240,13 +238,11 @@ export const searchRestaurants = async (location, filters, excludedPlaceIds = []
 
           // Exclude non-restaurant places (gas stations, stores, etc.)
           if (isNonRestaurant(place.types)) {
-            console.log(`❌ Excluded (non-restaurant): ${place.name} [${place.types.join(', ')}]`);
             return false;
           }
 
           // Exclude fast food chains and supermarket restaurants
           if (isFastFoodChain(place.name)) {
-            console.log(`❌ Excluded (fast food/supermarket): ${place.name}`);
             return false;
           }
 
@@ -262,16 +258,10 @@ export const searchRestaurants = async (location, filters, excludedPlaceIds = []
           return true;
         });
 
-        console.log(`✅ Filtered results: ${filteredResults.length} restaurants available`);
-        if (filteredResults.length > 0) {
-          console.log(`📍 Sample: ${filteredResults.slice(0, 3).map(p => p.name).join(', ')}`);
-        }
         resolve(filteredResults);
       } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
-        console.log('⚠️ Google Places returned zero results');
         resolve([]);
       } else {
-        console.error(`❌ Places search failed: ${status}`);
         reject(new Error(`Places search failed: ${status}`));
       }
     });
